@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autopilot Sales — Your Self-Driving Sales Agent</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #0F2547;
+    --accent: #1A6CF6;
+    --accent-dark: #1459D4;
+    --accent-light: #E8F0FF;
+    --bg: #F0F4FF;
+    --white: #FFFFFF;
+    --text: #0F2547;
+    --text-muted: #4A5A7A;
+    --border: #D1DCF0;
+    --shadow-sm: 0 1px 3px rgba(15,37,71,0.08), 0 1px 2px rgba(15,37,71,0.06);
+    --shadow-md: 0 4px 16px rgba(15,37,71,0.10), 0 2px 6px rgba(15,37,71,0.06);
+    --shadow-lg: 0 12px 40px rgba(15,37,71,0.14), 0 4px 12px rgba(15,37,71,0.08);
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(240,244,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent);
+    color: #fff !important;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--accent-dark) !important; color: #fff !important; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(26,108,246,0.35);
+  }
+  .btn-primary:hover {
+    background: var(--accent-dark);
+    box-shadow: 0 6px 20px rgba(26,108,246,0.45);
+    transform: translateY(-1px);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--border);
+  }
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-white {
+    background: #fff;
+    color: var(--accent);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-white:hover {
+    background: var(--accent-light);
+    transform: translateY(-1px);
+  }
+
+  /* ─── SECTIONS ─── */
+  section { padding: 96px 24px; }
+  .container { max-width: 1120px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 560px;
+  }
+  .section-header { margin-bottom: 56px; }
+  .center { text-align: center; }
+  .center .section-sub { margin: 0 auto; }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 160px 24px 100px;
+    background: linear-gradient(160deg, #0F2547 0%, #162F5C 50%, #1A3A72 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(26,108,246,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(26,108,246,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #93B8FF;
+    background: rgba(26,108,246,0.2);
+    border: 1px solid rgba(26,108,246,0.3);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 4.5vw, 54px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 span {
+    background: linear-gradient(135deg, #5BA3FF 0%, #93C5FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: #A8BFE0;
+    line-height: 1.7;
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .hero-note {
+    font-size: 13px;
+    color: #6B8AB8;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Hero right — dashboard mockup */
+  .hero-visual {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+  }
+  .dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .dash-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .dash-badge {
+    background: rgba(26,108,246,0.3);
+    color: #93B8FF;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .dash-stat {
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .dash-stat-val {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .dash-stat-lbl {
+    font-size: 10px;
+    color: #7094C4;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .dash-leads { margin-bottom: 16px; }
+  .dash-lead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 6px;
+  }
+  .lead-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .lead-info { flex: 1; min-width: 0; }
+  .lead-name { color: #E0EAFF; font-size: 12px; font-weight: 600; }
+  .lead-co { color: #6B8AB8; font-size: 11px; }
+  .lead-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 100px;
+  }
+  .status-sent { background: rgba(26,108,246,0.25); color: #93B8FF; }
+  .status-reply { background: rgba(22,193,110,0.2); color: #5DDBA8; }
+  .status-booked { background: rgba(245,158,11,0.2); color: #FCD34D; }
+  .dash-footer {
+    background: rgba(26,108,246,0.15);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #93B8FF;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #1A6CF6;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  /* ─── SOCIAL PROOF ─── */
+  .social-proof {
+    padding: 60px 24px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+  }
+  .proof-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .proof-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .proof-avatars {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .proof-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    margin-left: -10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .proof-avatar:first-child { margin-left: 0; }
+  .proof-quote-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    max-width: 460px;
+  }
+  .quote-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1A6CF6, #0F2547);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .quote-text {
+    font-size: 14px;
+    color: var(--text);
+    font-style: italic;
+    line-height: 1.5;
+  }
+  .quote-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .proof-count {
+    text-align: center;
+  }
+  .proof-count-num {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .proof-count-lbl {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* ─── FEATURES ─── */
+  .features { background: var(--bg); }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #5BA3FF);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .feature-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    width: 52px; height: 52px;
+    background: var(--accent-light);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .feature-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  .feature-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .feature-tag {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  /* ─── HOW IT WORKS ─── */
+  .how { background: var(--white); }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: calc(16.66% + 24px);
+    right: calc(16.66% + 24px);
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), #93B8FF);
+    z-index: 0;
+  }
+  .step {
+    text-align: center;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .step-num {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #1459D4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 24px rgba(26,108,246,0.35);
+    position: relative;
+  }
+  .step-num::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(26,108,246,0.3);
+  }
+  .step-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  .step-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ─── METRICS ─── */
+  .metrics {
+    background: linear-gradient(135deg, #0F2547 0%, #1A3A72 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .metrics::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(26,108,246,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    position: relative;
+    z-index: 1;
+  }
+  .metric-card {
+    text-align: center;
+    padding: 48px 32px;
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .metric-card:last-child { border-right: none; }
+  .metric-val {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .metric-val span {
+    background: linear-gradient(135deg, #5BA3FF, #93C5FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .metric-label {
+    font-size: 16px;
+    color: #7094C4;
+    font-weight: 500;
+  }
+
+  /* ─── PRICING ─── */
+  .pricing { background: var(--bg); }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .pricing-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .pricing-card.featured {
+    background: linear-gradient(160deg, #0F2547 0%, #1A3A72 100%);
+    border-color: transparent;
+    box-shadow: var(--shadow-lg);
+    transform: scale(1.04);
+  }
+  .pricing-card:hover:not(.featured) {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+  .pricing-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 100px;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(26,108,246,0.4);
+  }
+  .pricing-tier {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .pricing-card.featured .pricing-tier { color: #5BA3FF; }
+  .pricing-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .pricing-card.featured .pricing-name { color: #fff; }
+  .pricing-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .pricing-card.featured .pricing-desc { color: #7094C4; }
+  .pricing-price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pricing-card.featured .pricing-price { border-color: rgba(255,255,255,0.1); }
+  .price-dollar { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .pricing-card.featured .price-dollar { color: #5BA3FF; }
+  .price-num {
+    font-size: 52px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .pricing-card.featured .price-num { color: #fff; }
+  .price-period { font-size: 15px; color: var(--text-muted); }
+  .pricing-card.featured .price-period { color: #7094C4; }
+  .pricing-features { list-style: none; margin-bottom: 28px; }
+  .pricing-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pricing-card.featured .pricing-features li {
+    color: #C8D9F0;
+    border-color: rgba(255,255,255,0.08);
+  }
+  .pricing-features li:last-child { border-bottom: none; }
+  .check-icon { color: #1A6CF6; flex-shrink: 0; }
+  .pricing-card.featured .check-icon { color: #5BA3FF; }
+
+  /* ─── CTA BANNER ─── */
+  .cta-banner {
+    background: linear-gradient(135deg, #1A6CF6 0%, #0F2547 100%);
+    padding: 96px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .cta-inner { position: relative; z-index: 1; }
+  .cta-banner h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .cta-banner p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 36px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--primary);
+    padding: 64px 24px 32px;
+  }
+  .footer-inner { max-width: 1120px; margin: 0 auto; }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 32px;
+  }
+  .footer-brand .logo {
+    color: #fff;
+    margin-bottom: 12px;
+    display: inline-flex;
+  }
+  .footer-tagline {
+    font-size: 14px;
+    color: #4A6A9A;
+    line-height: 1.65;
+    max-width: 260px;
+    margin-bottom: 20px;
+  }
+  .footer-social {
+    display: flex;
+    gap: 12px;
+  }
+  .social-link {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    color: #7094C4;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .social-link:hover {
+    background: rgba(26,108,246,0.3);
+    color: #93B8FF;
+    border-color: rgba(26,108,246,0.4);
+  }
+  .footer-col h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul li a {
+    font-size: 14px;
+    color: #4A6A9A;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-col ul li a:hover { color: #93B8FF; }
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer-copy {
+    font-size: 13px;
+    color: #2A4A7A;
+  }
+  .footer-legal {
+    display: flex;
+    gap: 24px;
+  }
+  .footer-legal a {
+    font-size: 13px;
+    color: #2A4A7A;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-legal a:hover { color: #7094C4; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .features-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .pricing-card.featured { transform: scale(1); }
+    .steps { grid-template-columns: 1fr; }
+    .steps::before { display: none; }
+    .step { padding: 0 0 40px; text-align: left; display: flex; gap: 20px; align-items: flex-start; }
+    .step-num { margin: 0; flex-shrink: 0; width: 56px; height: 56px; font-size: 22px; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .metric-card { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .metric-card:last-child { border-bottom: none; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .proof-inner { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 600px) {
+    section { padding: 64px 20px; }
+    .hero { padding: 120px 20px 80px; }
+    .nav-links { display: none; }
+    .footer-top { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="7" stroke="white" stroke-width="1.5"/>
+          <path d="M9 5v4l2.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="9" cy="9" r="1.5" fill="white"/>
+        </svg>
+      </div>
+      Autopilot Sales
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#pricing" class="nav-cta">Book a Demo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <circle cx="5" cy="5" r="4" fill="#5BA3FF"/>
+        </svg>
+        AI-powered · 24/7 outbound · No SDR required
+      </div>
+      <h1>I hated sales, so I built a <span>self-driving sales agent</span></h1>
+      <p class="hero-sub">Autopilot Sales finds your leads, writes hyper-personalized messages, handles every follow-up, and books meetings — all while you sleep. Built for founders who'd rather ship than cold call.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="3" width="12" height="10" rx="2" stroke="white" stroke-width="1.5"/>
+            <path d="M5 3V2M11 3V2M2 7h12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Book a Demo
+        </a>
+        <a href="#how" class="btn btn-outline" style="color:#A8BFE0; border-color:rgba(168,191,224,0.25);">
+          See how it works →
+        </a>
+      </div>
+      <p class="hero-note">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1L8.8 5H13L9.5 7.8L10.8 12L7 9.5L3.2 12L4.5 7.8L1 5H5.2L7 1Z" fill="#6B8AB8"/>
+        </svg>
+        No credit card required · Setup in 10 minutes
+      </p>
+    </div>
+
+    <!-- Dashboard Mockup -->
+    <div class="hero-visual">
+      <div class="dash-header">
+        <span class="dash-title">Sales Autopilot — Live</span>
+        <span class="dash-badge">● Running</span>
+      </div>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-val">247</div>
+          <div class="dash-stat-lbl">Leads Found</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val">38</div>
+          <div class="dash-stat-lbl">Replies</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val">11</div>
+          <div class="dash-stat-lbl">Meetings</div>
+        </div>
+      </div>
+      <div class="dash-leads">
+        <div class="dash-lead">
+          <div class="lead-avatar" style="background:linear-gradient(135deg,#1A6CF6,#0F2547)">JK</div>
+          <div class="lead-info">
+            <div class="lead-name">Jamie Kim</div>
+            <div class="lead-co">Founder @ Axiom Labs</div>
+          </div>
+          <span class="lead-status status-booked">Meeting Booked</span>
+        </div>
+        <div class="dash-lead">
+          <div class="lead-avatar" style="background:linear-gradient(135deg,#0D9488,#0F766E)">MR</div>
+          <div class="lead-info">
+            <div class="lead-name">Marcus Reid</div>
+            <div class="lead-co">CEO @ Velociti</div>
+          </div>
+          <span class="lead-status status-reply">Replied</span>
+        </div>
+        <div class="dash-lead">
+          <div class="lead-avatar" style="background:linear-gradient(135deg,#7C3AED,#5B21B6)">SL</div>
+          <div class="lead-info">
+            <div class="lead-name">Sara Lin</div>
+            <div class="lead-co">Head of Ops @ Miru</div>
+          </div>
+          <span class="lead-status status-sent">Follow-up Sent</span>
+        </div>
+      </div>
+      <div class="dash-footer">
+        <div class="pulse-dot"></div>
+        AI agent running outreach · Next batch in 4 min
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<div class="social-proof">
+  <div class="proof-inner">
+    <div class="proof-count">
+      <div class="proof-count-num">200+</div>
+      <div class="proof-count-lbl">Founders using it</div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div class="proof-avatars">
+        <div class="proof-avatar" style="background:linear-gradient(135deg,#1A6CF6,#0F2547)">A</div>
+        <div class="proof-avatar" style="background:linear-gradient(135deg,#0D9488,#0F766E)">R</div>
+        <div class="proof-avatar" style="background:linear-gradient(135deg,#D97706,#B45309)">N</div>
+        <div class="proof-avatar" style="background:linear-gradient(135deg,#DC2626,#991B1B)">S</div>
+        <div class="proof-avatar" style="background:linear-gradient(135deg,#4F46E5,#3730A3)">+</div>
+      </div>
+      <div style="font-size:13px; color:var(--text-muted);">★★★★★ <span style="font-weight:600; color:var(--primary);">4.9/5</span> from 180+ reviews</div>
+    </div>
+
+    <div class="proof-quote-wrap">
+      <div class="quote-avatar">T</div>
+      <div>
+        <p class="quote-text">"We booked 14 qualified calls in the first week. I haven't touched outreach since we turned it on."</p>
+        <p class="quote-name">Tom Everett · Founder, Clearpath</p>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:32px; flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:900; color:var(--primary);">10x</div>
+        <div style="font-size:12px; color:var(--text-muted);">More outreach</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:900; color:var(--primary);">2.4x</div>
+        <div style="font-size:12px; color:var(--text-muted);">Reply rate</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:900; color:var(--primary);">3h</div>
+        <div style="font-size:12px; color:var(--text-muted);">Saved / day</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>
+        What it does
+      </div>
+      <h2 class="section-title">Everything your sales team does.<br>At 10× the speed.</h2>
+      <p class="section-sub">Four core capabilities that run 24/7, completely on autopilot.</p>
+    </div>
+    <div class="features-grid">
+
+      <!-- Lead Discovery -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+            <path d="M17 17l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 11h6M11 8v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Lead Discovery</h3>
+        <p class="feature-desc">Your agent searches LinkedIn, job boards, funding announcements, and web signals to build a fresh, qualified lead list every single day — matched exactly to your ICP.</p>
+        <span class="feature-tag">AI-powered prospecting</span>
+      </div>
+
+      <!-- Personalized Outreach -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect x="3" y="5" width="20" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M3 9l10 7 10-7" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 14l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Personalized Outreach</h3>
+        <p class="feature-desc">Every message is written from scratch using real data about the prospect — their recent activity, company news, role, and pain points. No templates. No cringe. Real relevance.</p>
+        <span class="feature-tag">GPT-4 copywriting</span>
+      </div>
+
+      <!-- Auto Follow-up -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <path d="M13 3C7.5 3 3 7.5 3 13s4.5 10 10 10 10-4.5 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M19 3v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 9v4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Auto Follow-up</h3>
+        <p class="feature-desc">Most deals are won on the 5th touch. Your agent automatically handles multi-step sequences — adjusting tone and timing based on engagement — so no lead goes cold.</p>
+        <span class="feature-tag">Smart sequences</span>
+      </div>
+
+      <!-- Meeting Booking -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect x="3" y="5" width="20" height="18" rx="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M3 11h20" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 3v4M18 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 16l3 3 7-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Meeting Booking</h3>
+        <p class="feature-desc">When a prospect says yes, your agent handles all the scheduling back-and-forth, syncs with your calendar, and sends confirmation + reminders. You just show up ready to close.</p>
+        <span class="feature-tag">Calendar sync</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>
+        How it works
+      </div>
+      <h2 class="section-title">Up and running in under 10 minutes</h2>
+      <p class="section-sub">Three steps from sign-up to your first booked meeting.</p>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3 class="step-title">Define your ICP</h3>
+          <p class="step-desc">Tell Autopilot who your ideal customer is — industry, company size, job title, tech stack, signals. No data import needed. The agent builds your list automatically.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3 class="step-title">Set your voice & offer</h3>
+          <p class="step-desc">Share your value proposition, a few examples of emails you love, and what you want prospects to do. The AI matches your tone and adapts every message for each individual lead.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3 class="step-title">Watch meetings appear</h3>
+          <p class="step-desc">Hit go. Your agent starts prospecting and outreaching immediately. Meetings land directly in your calendar. Check the live dashboard to see what's happening in real time.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section class="metrics">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:56px; position:relative; z-index:1;">
+      <div class="section-label" style="color:#93B8FF; background:rgba(26,108,246,0.2);">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>
+        Real results
+      </div>
+      <h2 class="section-title" style="color:#fff;">Numbers that speak for themselves</h2>
+      <p class="section-sub" style="color:#7094C4; margin:0 auto;">Aggregated across 200+ active accounts running Autopilot Sales.</p>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-val"><span>10×</span></div>
+        <div class="metric-label">More outreach volume vs. manual SDR</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val"><span>3h</span></div>
+        <div class="metric-label">Saved per founder per day on average</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val"><span>2.4×</span></div>
+        <div class="metric-label">Higher reply rate vs. generic templates</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>
+        Pricing
+      </div>
+      <h2 class="section-title">Simple, transparent pricing</h2>
+      <p class="section-sub">Start free for 14 days. No credit card required. Cancel any time.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Starter -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Starter</div>
+        <div class="pricing-name">Solo Operator</div>
+        <div class="pricing-desc">Perfect for founders doing their own outbound.</div>
+        <div class="pricing-price">
+          <span class="price-dollar">$</span>
+          <span class="price-num">99</span>
+          <span class="price-period">/mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            250 leads/month
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            AI-personalized email outreach
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            3-step follow-up sequences
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Calendly / Cal.com integration
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Live dashboard
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Email support
+          </li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="width:100%; justify-content:center;">Start Free Trial</a>
+      </div>
+
+      <!-- Growth (featured) -->
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-tier">Growth</div>
+        <div class="pricing-name">Scaling Team</div>
+        <div class="pricing-desc">For teams ready to pour fuel on the fire.</div>
+        <div class="pricing-price">
+          <span class="price-dollar">$</span>
+          <span class="price-num">299</span>
+          <span class="price-period">/mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            1,000 leads/month
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Multi-channel (email + LinkedIn)
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            7-step sequences with AI branching
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            CRM sync (HubSpot, Salesforce)
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Up to 3 seats
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            A/B testing &amp; analytics
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Priority Slack support
+          </li>
+        </ul>
+        <a href="#" class="btn btn-white" style="width:100%; justify-content:center;">Start Free Trial</a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Enterprise</div>
+        <div class="pricing-name">Full Team</div>
+        <div class="pricing-desc">For sales teams that want the full machine.</div>
+        <div class="pricing-price">
+          <span class="price-dollar">$</span>
+          <span class="price-num">799</span>
+          <span class="price-period">/mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Unlimited leads
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            All channels incl. cold calling AI
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Custom AI persona training
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Unlimited seats
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Dedicated onboarding + CSM
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            SSO &amp; custom contracts
+          </li>
+          <li>
+            <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            99.9% SLA uptime guarantee
+          </li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width:100%; justify-content:center;">Book a Demo</a>
+      </div>
+
+    </div>
+    <p style="text-align:center; margin-top:32px; font-size:14px; color:var(--text-muted);">All plans include a 14-day free trial. No setup fees. Cancel any time.</p>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="cta-inner">
+    <div class="section-label" style="color:#93B8FF; background:rgba(255,255,255,0.1); margin-bottom:20px; display:inline-flex;">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#5BA3FF"/></svg>
+      Ready to put sales on autopilot?
+    </div>
+    <h2>Stop doing sales. Start closing deals.</h2>
+    <p>Join 200+ founders who replaced their outbound grind with a self-driving sales agent. Set it up in 10 minutes.</p>
+    <div class="cta-actions">
+      <a href="#pricing" class="btn btn-white">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Book a Demo
+      </a>
+      <a href="#pricing" class="btn btn-ghost">Start Free Trial →</a>
+    </div>
+    <p style="margin-top:20px; font-size:13px; color:rgba(255,255,255,0.4);">No credit card · 14-day trial · Cancel any time</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="7" stroke="white" stroke-width="1.5"/>
+              <path d="M9 5v4l2.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="9" cy="9" r="1.5" fill="white"/>
+            </svg>
+          </div>
+          Autopilot Sales
+        </a>
+        <p class="footer-tagline">Your self-driving sales agent. Built for founders who'd rather ship than cold call.</p>
+        <div class="footer-social">
+          <a href="#" class="social-link" aria-label="Twitter / X">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M13 2L8.5 7.2 14 13H10.5L7 8.8 3 13H1L5.8 7.5 0.5 2H4L7.2 5.8 11 2H13Z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="#" class="social-link" aria-label="LinkedIn">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="1" y="1" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M4 6v5M4 4v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M7 11V8c0-1.1.9-2 2-2s2 .9 2 2v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a href="#" class="social-link" aria-label="YouTube">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="1" y="3" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M6 5.5l4 2-4 2V5.5Z" fill="currentColor"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#">Integrations</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API Reference</a></li>
+          <li><a href="#">Status page</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Affiliates</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2024 Autopilot Sales, Inc. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
